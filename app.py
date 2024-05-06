@@ -16,40 +16,44 @@ def main():
     st.set_page_config(page_title="Chat With any files")
     st.header("💬 Chatbot")
 
-    # Path to your pre-existing documents
-    doc_paths = [
-        "AOH LOTO-ATS 1- Line 2.docx",
-        "AOH LOTO-ATS 2- Line 1.docx",
-        "AOH LOTO-ATS 3- Line 1.docx",
-        "AOH LOTO-ATS 3- Line 2.docx"
-    ]
+    # Prompt user to enter API key
+    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
 
-    if "conversation" not in st.session_state:
-        st.session_state.conversation = None
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = None
-    if "processComplete" not in st.session_state:
-        st.session_state.processComplete = None
+    # Check if API key is provided and process button is clicked
+    if openai_api_key:
+        # Path to your pre-existing documents
+        doc_paths = [
+            "AOH LOTO-ATS 1- Line 2.docx",
+            "AOH LOTO-ATS 2- Line 1.docx",
+            "AOH LOTO-ATS 3- Line 1.docx",
+            "AOH LOTO-ATS 3- Line 2.docx"
+        ]
 
-    process = st.button("Process")
-    if process:
-        # Read text from documents
-        files_text = ""
-        for doc_path in doc_paths:
-            files_text += get_docx_text(doc_path)
-        # get text chunks
-        text_chunks = get_text_chunks(files_text)
-        # create vector stores
-        vetorestore = get_vectorstore(text_chunks)
-        # create conversation chain
-        openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-        st.session_state.conversation = get_conversation_chain(vetorestore, openai_api_key)
-        st.session_state.processComplete = True
+        if "conversation" not in st.session_state:
+            st.session_state.conversation = None
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = None
+        if "processComplete" not in st.session_state:
+            st.session_state.processComplete = None
 
-    if st.session_state.processComplete == True:
-        user_question = st.text_input("Ask Question about your files.")
-        if user_question:
-            handel_userinput(user_question)
+        process = st.button("Process")
+        if process:
+            # Read text from documents
+            files_text = ""
+            for doc_path in doc_paths:
+                files_text += get_docx_text(doc_path)
+            # get text chunks
+            text_chunks = get_text_chunks(files_text)
+            # create vector stores
+            vetorestore = get_vectorstore(text_chunks)
+            # create conversation chain
+            st.session_state.conversation = get_conversation_chain(vetorestore, openai_api_key)
+            st.session_state.processComplete = True
+
+        if st.session_state.processComplete == True:
+            user_question = st.text_input("Ask Question about your files.")
+            if user_question:
+                handel_userinput(user_question)
 
 def get_docx_text(file_path):
     doc = docx.Document(file_path)
